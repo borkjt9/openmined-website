@@ -2,32 +2,44 @@ import { createStore, applyMiddleware, compose } from 'redux';
 import { routerMiddleware } from 'react-router-redux';
 import thunk from 'redux-thunk';
 
-import * as reduxHistory from 'history';
+import { createBrowserHistory, createMemoryHistory } from 'history';
 import rootReducer from './modules';
 
-const isServer = !(typeof window !== 'undefined' && window.document);
+// A nice helper to tell us if we're on
+export const isServer = !(
+  typeof window !== 'undefined' &&
+  window.document &&
+  window.document.createElement
+);
 
+// Create a history depending on the environment
 export const history = isServer
-  ? reduxHistory.createMemoryHistory()
-  : reduxHistory.createBrowserHistory();
+  ? createMemoryHistory()
+  : createBrowserHistory();
 
-export default (initialState = {}, server = {}) => {
-  const enhancers = [];
+const enhancers = [];
 
-  if (process.env.NODE_ENV === 'development' && !isServer) {
-    const devToolsExtension = window.devToolsExtension;
+// Dev tools are helpful
+if (process.env.NODE_ENV === 'development' && !isServer) {
+  const devToolsExtension = window.devToolsExtension;
 
-    if (typeof devToolsExtension === 'function') {
-      enhancers.push(devToolsExtension());
-    }
+  if (typeof devToolsExtension === 'function') {
+    enhancers.push(devToolsExtension());
   }
+}
 
-  const middleware = [thunk, routerMiddleware(history)];
+const middleware = [thunk, routerMiddleware(history)];
+const composedEnhancers = compose(applyMiddleware(...middleware), ...enhancers);
 
-  const composedEnhancers = compose(
-    applyMiddleware(...middleware),
-    ...enhancers
-  );
+// Get the preloaded state from the server
+const initialState = !isServer ? window.__PRELOADED_STATE__ : {};
 
-  return createStore(rootReducer, initialState, composedEnhancers);
-};
+// Delete it once we've got it
+if (!isServer) {
+  delete window.__PRELOADED_STATE__;
+}
+
+// Create the store
+const store = createStore(rootReducer, initialState, composedEnhancers);
+
+export default store;

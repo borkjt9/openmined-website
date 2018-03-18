@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch } from 'react-router-dom';
-import { withWrapper } from 'create-react-server/wrapper';
 
 // Action Creators
 import { removeNotification } from '../../modules/notifications';
@@ -52,4 +51,4 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ removeNotification }, dispatch);
 
-export default withWrapper(connect(mapStateToProps, mapDispatchToProps)(App));
+export default connect(mapStateToProps, mapDispatchToProps)(App);

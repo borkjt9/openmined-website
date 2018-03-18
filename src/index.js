@@ -1,23 +1,39 @@
 import React from 'react';
-import { render } from 'react-dom';
-import { Router } from 'react-router-dom';
-import { history } from './store';
-// import registerServiceWorker from './registerServiceWorker';
+import { render, hydrate } from 'react-dom';
+import { Provider } from 'react-redux';
+import Loadable from 'react-loadable';
+import { Frontload } from 'react-frontload';
+import { ConnectedRouter } from 'react-router-redux';
+import store, { history } from './store';
 import { unregister } from './registerServiceWorker';
-import createApp from './app';
+
+import App from './containers/app';
 
 import './index.css';
 
-render(
-  <Router history={history}>
-    {createApp({
-      state: window.__INITIAL__STATE__,
-      props: window.__INITIAL__PROPS__
-    })}
-  </Router>,
-  document.querySelector('#root')
+const Application = (
+  <Provider store={store}>
+    <ConnectedRouter history={history}>
+      <Frontload noServerRender>
+        <App />
+      </Frontload>
+    </ConnectedRouter>
+  </Provider>
 );
 
-// Disabled until we find a better caching strategy
+const root = document.querySelector('#root');
+
+// Render everything to the root - it's business time
+if (process.env.NODE_ENV === 'production') {
+  window.onload = () => {
+    Loadable.preloadReady().then(() => {
+      hydrate(Application, root);
+    });
+  };
+} else {
+  render(Application, root);
+}
+
+// TODO: Until we can find a way to perform SSR with a service worker - let's get this outta here
 // registerServiceWorker();
 unregister();

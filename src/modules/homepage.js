@@ -150,12 +150,10 @@ const getGithubData = () => dispatch =>
       .catch(error => dispatch(handleWordpressError(error)));
   });
 
-export const getContent = (shouldCallGithub = true) => {
-  return async dispatch => {
-    await dispatch(getHomepageContent());
+export const getContent = (shouldCallGithub = true) => async dispatch => {
+  await dispatch(getHomepageContent());
 
-    if (shouldCallGithub) {
-      await dispatch(getGithubData());
-    }
-  };
+  if (shouldCallGithub) {
+    await dispatch(getGithubData());
+  }
 };

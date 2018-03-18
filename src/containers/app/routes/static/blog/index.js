@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { Button, Page } from 'openmined-ui';
 import { connect } from 'react-redux';
-import { withWrapper } from 'create-react-server/wrapper';
+import { frontloadConnect } from 'react-frontload';
 import { getPosts } from '../../../../../modules/blog';
 import { getContent } from '../../../../../modules/homepage';
 
@@ -17,27 +17,27 @@ const blogExcerpt =
 
 // TODO: Newsletter link...
 
-class Blog extends Component {
-  static async getInitialProps(props) {
-    // TODO: Figure out a better way to do this
-    let pathname = props.location.pathname.split('/');
-    let request;
+const frontload = props => {
+  // TODO: Figure out a better way to do this
+  let pathname = props.location.pathname.split('/');
+  let request;
 
-    if (pathname.length > 3) {
-      let taxonomy = pathname[2];
-      let slug = pathname[3];
+  if (pathname.length > 3) {
+    let taxonomy = pathname[2];
+    let slug = pathname[3];
 
-      request = {
-        page: 1,
-        [taxonomy]: slug
-      };
-    } else {
-      request = { page: 1 };
-    }
-
-    await props.store.dispatch(getPosts(request, true));
+    request = {
+      page: 1,
+      [taxonomy]: slug
+    };
+  } else {
+    request = { page: 1 };
   }
 
+  props.getPosts(request, true);
+};
+
+class Blog extends Component {
   constructor(props) {
     super(props);
 
@@ -232,4 +232,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ getContent, getPosts }, dispatch);
 
-export default withWrapper(connect(mapStateToProps, mapDispatchToProps)(Blog));
+export default connect(mapStateToProps, mapDispatchToProps)(
+  frontloadConnect(frontload, {
+    onMount: true,
+    onUpdate: false
+  })(Blog)
+);

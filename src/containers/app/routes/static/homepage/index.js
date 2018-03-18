@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import { withWrapper } from 'create-react-server/wrapper';
+import { frontloadConnect } from 'react-frontload';
 import { addNotification } from '../../../../../modules/notifications';
 import { getContent } from '../../../../../modules/homepage';
 import { Page } from 'openmined-ui';
@@ -15,11 +15,9 @@ import Footer from './footer';
 
 import './homepage.css';
 
-class Homepage extends Component {
-  static async getInitialProps(props) {
-    await props.store.dispatch(getContent());
-  }
+const frontload = props => props.getContent();
 
+class Homepage extends Component {
   render() {
     const { hero, mission, process, timeline, footer } = this.props.content;
 
@@ -42,8 +40,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({ addNotification }, dispatch);
+  bindActionCreators({ addNotification, getContent }, dispatch);
 
-export default withWrapper(
-  connect(mapStateToProps, mapDispatchToProps)(Homepage)
+export default connect(mapStateToProps, mapDispatchToProps)(
+  frontloadConnect(frontload, {
+    onMount: true,
+    onUpdate: false
+  })(Homepage)
 );

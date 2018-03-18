@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { withWrapper } from 'create-react-server/wrapper';
 import { Container, Row, Column, Page } from 'openmined-ui';
 import renderHTML from 'react-render-html';
 import moment from 'moment';
+import { frontloadConnect } from 'react-frontload';
 import { getCurrentPost } from '../../../../../modules/blog';
 import { getContent } from '../../../../../modules/homepage';
 
@@ -28,14 +28,14 @@ const lookupTaxonomy = (list, id) => {
   return returned;
 };
 
+const frontload = props => {
+  // TODO: Figure out a better way to do this
+  let pathname = props.location.pathname.split('/');
+
+  props.getCurrentPost(pathname[2]);
+};
+
 class BlogPost extends Component {
-  static async getInitialProps(props) {
-    // TODO: Figure out a better way to do this
-    let pathname = props.location.pathname.split('/');
-
-    await props.store.dispatch(getCurrentPost(pathname[2]));
-  }
-
   componentWillMount() {
     this.props.getContent(false);
   }
@@ -190,8 +190,11 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch =>
-  bindActionCreators({ getContent }, dispatch);
+  bindActionCreators({ getContent, getCurrentPost }, dispatch);
 
-export default withWrapper(
-  connect(mapStateToProps, mapDispatchToProps)(BlogPost)
+export default connect(mapStateToProps, mapDispatchToProps)(
+  frontloadConnect(frontload, {
+    onMount: true,
+    onUpdate: false
+  })(BlogPost)
 );

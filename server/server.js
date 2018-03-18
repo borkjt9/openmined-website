@@ -1,57 +1,63 @@
-import 'es6-promise/auto';
-import 'isomorphic-fetch';
-import Express from 'express';
+// Express requirements
+import bodyParser from 'body-parser';
+import compression from 'compression';
+import express from 'express';
+import morgan from 'morgan';
+import path from 'path';
 import forceDomain from 'forcedomain';
-import unless from 'express-unless';
-import {
-  createExpressMiddleware,
-  skipRequireExtensions
-} from 'create-react-server';
+import Loadable from 'react-loadable';
 
-import app from '../src/app';
-import template from './template';
+// Loader
+import loader from './loader';
 
-try {
-  skipRequireExtensions();
+// Create our express app (using the port optionally specified)
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  const express = Express();
-  const port = process.env.PORT || 3000;
+// Forcing www and https redirects in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(
+    forceDomain({
+      hostname: 'www.openmined.com',
+      protocol: 'https'
+    })
+  );
+}
 
-  if (process.env.HOST_NAME) {
-    express.use(
-      forceDomain({
-        hostname: process.env.HOST_NAME,
-        protocol: process.env.FORCE_SSL === 'true' ? 'https' : 'http'
-      })
-    );
+// Compress, parse, and log
+app.use(compression());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(morgan('dev'));
+
+// Set up homepage, static assets, and capture everything else
+app.use(express.Router().get('/', loader));
+app.use(express.static(path.resolve(__dirname, '../build')));
+app.use(loader);
+
+// Let's rock
+Loadable.preloadAll().then(() => {
+  app.listen(PORT, console.log(`App listening on port ${PORT}!`));
+});
+
+// Handle the bugs somehow
+app.on('error', error => {
+  if (error.syscall !== 'listen') {
+    throw error;
   }
 
-  const crsMiddleware = createExpressMiddleware({
-    port: process.env.PORT || 3000,
-    app,
-    template,
-    debug: true
-  });
+  const bind = typeof PORT === 'string' ? 'Pipe ' + PORT : 'Port ' + PORT;
 
-  crsMiddleware.unless = unless;
-
-  // TODO: This is a hack.  We're having a weird issue with loading an object which is related to how CRA bundles images.  This is yet to be solved and understood better - any assistance would be immensely helpful.
-  express.use(
-    crsMiddleware.unless(
-      req =>
-        req.originalUrl.includes('[object%20Object]') ||
-        req.originalUrl.includes('sw-precache')
-    )
-  );
-
-  express.use(Express.static(process.cwd() + '/build'));
-
-  express.listen(port, err => {
-    if (err) throw err;
-
-    console.log('Listening at port ' + port);
-  });
-} catch (e) {
-  console.error(e.stack);
-  process.exit(1);
-}
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+});

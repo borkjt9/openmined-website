@@ -214,21 +214,17 @@ const getAuthor = id => dispatch =>
       .catch(error => dispatch(handleWordpressError(error)));
   });
 
-export const getPosts = (query, isFresh) => {
-  return async dispatch => {
-    const taxonomies = await dispatch(getOrLoadTaxonomies());
+export const getPosts = (query, isFresh) => async dispatch => {
+  const taxonomies = await dispatch(getOrLoadTaxonomies());
 
-    await dispatch(getAllPosts(query, isFresh, taxonomies));
-  };
+  await dispatch(getAllPosts(query, isFresh, taxonomies));
 };
 
-export const getCurrentPost = slug => {
-  return async dispatch => {
-    await dispatch(getOrLoadTaxonomies());
+export const getCurrentPost = slug => async dispatch => {
+  await dispatch(getOrLoadTaxonomies());
 
-    const post = await dispatch(getPost(slug));
+  const post = await dispatch(getPost(slug));
 
-    await dispatch(getFeaturedMedia(post.featured_media));
-    await dispatch(getAuthor(post.author));
-  };
+  await dispatch(getFeaturedMedia(post.featured_media));
+  await dispatch(getAuthor(post.author));
 };
