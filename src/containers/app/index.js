@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch } from 'react-router-dom';
 import { withRouter } from 'react-router';
+import Loadable from 'react-loadable';
 
 // Action Creators
 import { removeNotification } from '../../modules/notifications';
@@ -10,11 +11,33 @@ import { removeNotification } from '../../modules/notifications';
 // UI Components
 import Notifications from './components/notifications';
 
-// Routes
-import Homepage from './routes/static/homepage';
-import Blog from './routes/static/blog';
-import BlogPost from './routes/static/blog-post';
-import NotFound from './routes/not-found';
+// Routes via react-loadable code splitting
+const Homepage = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "homepage" */ './routes/static/homepage'),
+  loading: () => null,
+  modules: ['homepage']
+});
+
+const Blog = Loadable({
+  loader: () => import(/* webpackChunkName: "blog" */ './routes/static/blog'),
+  loading: () => null,
+  modules: ['blog']
+});
+
+const BlogPost = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "blog-post" */ './routes/static/blog-post'),
+  loading: () => null,
+  modules: ['blog-post']
+});
+
+const NotFound = Loadable({
+  loader: () =>
+    import(/* webpackChunkName: "not-found" */ './routes/not-found'),
+  loading: () => null,
+  modules: ['not-found']
+});
 
 const RedirectToWordpress = () =>
   (window.location = 'https://api.openmined.org/wp-login.php');
