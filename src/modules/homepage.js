@@ -1,4 +1,4 @@
-import { WORDPRESS_API_URL, handleWordpressError } from './index';
+import { handleWordpressError } from './index';
 
 export const GET_CONTENT = 'homepage/GET_CONTENT';
 export const GET_GITHUB_PROJECTS = 'homepage/GET_GITHUB_PROJECTS';
@@ -105,9 +105,9 @@ const formatContent = (content, item) => {
   return items;
 };
 
-const getHomepageContent = () => dispatch =>
+const getHomepageContent = API_URL => dispatch =>
   new Promise(resolve => {
-    fetch(WORDPRESS_API_URL + '/acf/v2/options')
+    fetch(API_URL + '/acf/v2/options')
       .then(response => response.json())
       .then(response => {
         const content = {};
@@ -127,9 +127,9 @@ const getHomepageContent = () => dispatch =>
       .catch(error => dispatch(handleWordpressError(error)));
   });
 
-const getGithubData = () => dispatch =>
+const getGithubData = API_URL => dispatch =>
   new Promise(resolve => {
-    fetch(WORDPRESS_API_URL + '/github/all')
+    fetch(API_URL + '/github/all')
       .then(response => response.json())
       .then(({ members, repos }) => {
         dispatch({
@@ -150,10 +150,15 @@ const getGithubData = () => dispatch =>
       .catch(error => dispatch(handleWordpressError(error)));
   });
 
-export const getContent = (shouldCallGithub = true) => async dispatch => {
-  await dispatch(getHomepageContent());
+export const getContent = (shouldCallGithub = true) => async (
+  dispatch,
+  getState
+) => {
+  const API_URL = getState().blog.apiUrl;
+
+  await dispatch(getHomepageContent(API_URL));
 
   if (shouldCallGithub) {
-    await dispatch(getGithubData());
+    await dispatch(getGithubData(API_URL));
   }
 };

@@ -15,6 +15,7 @@ import Loadable from 'react-loadable';
 // Our store, entrypoint, and manifest
 import store from '../src/store';
 import App from '../src/containers/app';
+import { setApiUrl } from '../src/modules/blog';
 import manifest from '../build/asset-manifest.json';
 
 export default (req, res) => {
@@ -55,6 +56,16 @@ export default (req, res) => {
 
       // Push the current url into the store to let Redux know what state to load
       store.dispatch(replace(req.url));
+
+      // When CRA builds it always builds to the production environment
+      // However, our express server has a separate NODE_ENV variable as defined in package.json
+      // In short...
+      // yarn start === localhost
+      // yarn build && yarn serve === localhost
+      // yarn build && yarn deploy === live API
+      if (process.env.NODE_ENV === 'production') {
+        store.dispatch(setApiUrl('https://api.openmined.org/wp-json'));
+      }
 
       const context = {};
       const modules = [];

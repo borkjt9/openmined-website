@@ -15,11 +15,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Forcing www and https redirects in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(
+if (process.env.HOST_NAME) {
+  express.use(
     forceDomain({
-      hostname: 'www.openmined.com',
-      protocol: 'https'
+      hostname: process.env.HOST_NAME,
+      protocol: process.env.FORCE_SSL === 'true' ? 'https' : 'http'
     })
   );
 }

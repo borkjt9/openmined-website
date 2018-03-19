@@ -5,11 +5,6 @@ import notifications, { addNotification } from './notifications';
 import homepage from './homepage';
 import blog from './blog';
 
-export const WORDPRESS_API_URL =
-  process.env.NODE_ENV === 'development'
-    ? 'https://openmined-wordpress.local/wp-json'
-    : 'https://api.openmined.org/wp-json';
-
 export const handleWordpressError = error =>
   addNotification({
     text: error,

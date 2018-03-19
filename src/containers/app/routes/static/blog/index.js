@@ -18,23 +18,14 @@ const blogExcerpt =
 // TODO: Newsletter link...
 
 const frontload = props => {
-  // TODO: Figure out a better way to do this
-  let pathname = props.location.pathname.split('/');
-  let request;
+  const request = { page: 1 };
+  const { taxonomy, slug } = props.match.params;
 
-  if (pathname.length > 3) {
-    let taxonomy = pathname[2];
-    let slug = pathname[3];
-
-    request = {
-      page: 1,
-      [taxonomy]: slug
-    };
-  } else {
-    request = { page: 1 };
+  if (taxonomy && slug) {
+    request[taxonomy] = slug;
   }
 
-  props.getPosts(request, true);
+  return props.getPosts(request, true);
 };
 
 class Blog extends Component {

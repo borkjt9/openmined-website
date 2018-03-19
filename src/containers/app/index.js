@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Route, Switch } from 'react-router-dom';
+import { withRouter } from 'react-router';
 
 // Action Creators
 import { removeNotification } from '../../modules/notifications';
@@ -16,7 +17,7 @@ import BlogPost from './routes/static/blog-post';
 import NotFound from './routes/not-found';
 
 const RedirectToWordpress = () =>
-  (window.location = 'https://api.openmined.org/wp-admin/');
+  (window.location = 'https://api.openmined.org/wp-login.php');
 
 class App extends Component {
   render() {
@@ -51,4 +52,4 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch =>
   bindActionCreators({ removeNotification }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(App);
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));

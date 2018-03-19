@@ -28,12 +28,7 @@ const lookupTaxonomy = (list, id) => {
   return returned;
 };
 
-const frontload = props => {
-  // TODO: Figure out a better way to do this
-  let pathname = props.location.pathname.split('/');
-
-  props.getCurrentPost(pathname[2]);
-};
+const frontload = props => props.getCurrentPost(props.match.params.slug);
 
 class BlogPost extends Component {
   componentWillMount() {
