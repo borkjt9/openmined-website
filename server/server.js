@@ -1,3 +1,15 @@
+/*
+  TODO:
+  - Fix issues with SSR fetch
+  - Look into issues with images
+    - Potentially move them into a forward directory rather than a backwards directory
+    - If all else fails, move them to the public directory and call it a day
+  - Fix FOUC
+*/
+
+// Silly global things
+import 'ignore-styles';
+
 // Express requirements
 import bodyParser from 'body-parser';
 import compression from 'compression';
