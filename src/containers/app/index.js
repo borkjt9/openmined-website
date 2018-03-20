@@ -4,6 +4,7 @@ import { bindActionCreators } from 'redux';
 import { Route, Switch } from 'react-router-dom';
 import { withRouter } from 'react-router';
 import Loadable from 'react-loadable';
+import { WORDPRESS_URL } from '../../modules';
 
 // Action Creators
 import { removeNotification } from '../../modules/notifications';
@@ -40,9 +41,15 @@ const NotFound = Loadable({
 });
 
 const RedirectToWordpress = () =>
-  (window.location = 'https://api.openmined.org/wp-login.php');
+  (window.location = WORDPRESS_URL + '/wp-login.php');
 
 class App extends Component {
+  componentDidMount() {
+    this.props.history.listen(() => {
+      window.scrollTo(0, 0);
+    });
+  }
+
   render() {
     return (
       <div id="app">
@@ -54,9 +61,12 @@ class App extends Component {
           <Switch>
             <Route exact path="/" component={Homepage} />
 
-            <Route path="/blog/:taxonomy/:slug/" component={Blog} />
-            <Route path="/blog/:slug/" component={BlogPost} />
-            <Route path="/blog" component={Blog} />
+            <Route
+              path="/:locale(blog|digs)/:taxonomy/:slug/"
+              component={Blog}
+            />
+            <Route path="/:locale(blog|digs)/:slug/" component={BlogPost} />
+            <Route path="/:locale(blog|digs)" component={Blog} />
 
             <Route path="/admin" component={RedirectToWordpress} />
 

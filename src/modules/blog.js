@@ -166,6 +166,15 @@ const getAllPosts = (
       query.tags = matchTaxonomyWithId(tags, query.tags).id;
     }
 
+    if (query.digs) {
+      query.categories = query.digsId;
+
+      delete query.digs;
+      delete query.digsId;
+    } else {
+      query.categories_exclude = query.digsId;
+    }
+
     let queryString = Object.keys(query)
       .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(query[k])}`)
       .join('&');
@@ -239,6 +248,12 @@ export const getPosts = (query, isFresh) => async (dispatch, getState) => {
   const API_URL = getState().blog.apiUrl;
 
   const taxonomies = await dispatch(getOrLoadTaxonomies(API_URL));
+
+  taxonomies.categories.forEach(category => {
+    if (category.slug === 'digs') {
+      query.digsId = category.id;
+    }
+  });
 
   await dispatch(getAllPosts(API_URL, query, isFresh, taxonomies));
 };

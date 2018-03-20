@@ -7,6 +7,7 @@ import { getContent } from '../../../../../modules/homepage';
 import { Page } from 'openmined-ui';
 
 import Loading from '../../../components/loading';
+import FooterLinks from '../../../components/footer-links';
 import Hero from './hero';
 import Mission from './mission';
 import Process from './process';
@@ -19,7 +20,14 @@ const frontload = props => props.getContent();
 
 class Homepage extends Component {
   render() {
-    const { hero, mission, process, timeline, footer } = this.props.content;
+    const {
+      hero,
+      mission,
+      process,
+      timeline,
+      footer,
+      general
+    } = this.props.content;
 
     return (
       <Page id="homepage">
@@ -29,6 +37,7 @@ class Homepage extends Component {
         <Process {...process} />
         <Timeline {...timeline} />
         <Footer {...footer} />
+        <FooterLinks links={footer.links} socialMedia={general.social_media} />
       </Page>
     );
   }

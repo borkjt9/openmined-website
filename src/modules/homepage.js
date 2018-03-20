@@ -24,7 +24,9 @@ const initialState = {
         movement_slack: {},
         movement_newsletter: {}
       }
-    }
+    },
+    general: {},
+    weekly_digs: {}
   }
 };
 
@@ -111,7 +113,15 @@ const getHomepageContent = API_URL => dispatch =>
       .then(response => response.json())
       .then(response => {
         const content = {};
-        const items = ['hero', 'mission', 'process', 'timeline', 'footer'];
+        const items = [
+          'hero',
+          'mission',
+          'process',
+          'timeline',
+          'footer',
+          'general',
+          'weekly_digs'
+        ];
 
         items.forEach(item => {
           content[item] = formatContent(response.acf, item);

@@ -1,17 +1,22 @@
 import React, { Component } from 'react';
 import { bindActionCreators } from 'redux';
-import { Button, Page } from 'openmined-ui';
+import { Container, Row, Column, Button, Page } from 'openmined-ui';
 import { connect } from 'react-redux';
 import { frontloadConnect } from 'react-frontload';
+import { Link } from 'react-router-dom';
 import { getPosts } from '../../../../../modules/blog';
 import { getContent } from '../../../../../modules/homepage';
+import { SITE_URL } from '../../../../../modules';
 
 import BlogHeader from '../../../components/blog-header';
 import Loading from '../../../components/loading';
 import BlogPosts from '../../../components/blog-posts';
+import FooterLinks from '../../../components/footer-links';
 
 import './blog.css';
 
+const blogTitle = 'OpenMined Blog';
+const blogShortName = 'Blog';
 const blogExcerpt =
   'Home to the latest research, thoughts, and demos surrounding the OpenMined project and the larger artificial intelligence ecosystem.';
 
@@ -19,7 +24,11 @@ const blogExcerpt =
 
 const frontload = props => {
   const request = { page: 1 };
-  const { taxonomy, slug } = props.match.params;
+  const { taxonomy, slug, locale } = props.match.params;
+
+  if (locale === 'digs') {
+    request.digs = true;
+  }
 
   if (taxonomy && slug) {
     request[taxonomy] = slug;
@@ -49,7 +58,11 @@ class Blog extends Component {
     const newUrl = newProps.match.params;
     const oldUrl = this.props.match.params;
 
-    if (newUrl.taxonomy !== oldUrl.taxonomy || newUrl.slug !== oldUrl.slug) {
+    if (
+      newUrl.taxonomy !== oldUrl.taxonomy ||
+      newUrl.slug !== oldUrl.slug ||
+      newUrl.locale !== oldUrl.locale
+    ) {
       this.setState(
         {
           page: 1
@@ -65,19 +78,23 @@ class Blog extends Component {
     const hasTaxonomy = this.props.match.params.hasOwnProperty('taxonomy');
 
     if (hasTaxonomy) {
-      let { taxonomy, slug } = this.props.match.params;
+      let { taxonomy, slug, locale } = this.props.match.params;
 
       this.props.getPosts(
         {
           page: this.state.page,
-          [taxonomy]: slug
+          [taxonomy]: slug,
+          digs: locale === 'digs'
         },
         isFresh
       );
     } else if (!hasTaxonomy) {
+      let { locale } = this.props.match.params;
+
       this.props.getPosts(
         {
-          page: this.state.page
+          page: this.state.page,
+          digs: locale === 'digs'
         },
         isFresh
       );
@@ -97,57 +114,47 @@ class Blog extends Component {
     );
   }
 
-  seoHeaderInfo(taxonomy, slug) {
+  lookupTaxonomy(list, check, field = 'slug') {
+    let returned = {};
+
+    list.forEach(taxonomy => {
+      if (taxonomy[field] === check) {
+        returned = taxonomy;
+      }
+    });
+
+    return returned;
+  }
+
+  seoHeaderInfo(taxonomy, slug, shortName, excerpt, images) {
     if (taxonomy && slug) {
-      const lookupTaxonomy = (list, slug) => {
-        let returned = {};
-
-        list.forEach(taxonomy => {
-          if (taxonomy.slug === slug) {
-            returned = taxonomy;
-          }
-        });
-
-        return returned;
-      };
-
       let taxonomyData =
         taxonomy === 'categories'
-          ? lookupTaxonomy(this.props.categories, slug)
-          : lookupTaxonomy(this.props.tags, slug);
+          ? this.lookupTaxonomy(this.props.categories, slug)
+          : this.lookupTaxonomy(this.props.tags, slug);
 
       return {
-        title: 'Blog - ' + taxonomyData.name,
-        description: taxonomyData.description || blogExcerpt
+        title: shortName + ' - ' + taxonomyData.name,
+        description: taxonomyData.description || excerpt,
+        ...images
       };
     } else {
       return {
-        title: 'Blog',
-        description: blogExcerpt
+        title: shortName,
+        description: excerpt,
+        ...images
       };
     }
   }
 
-  blogHeaderInfo(taxonomy, slug) {
+  blogHeaderInfo(taxonomy, slug, title, excerpt) {
     let links = this.props.content.footer.links;
 
     if (taxonomy && slug) {
-      const lookupTaxonomy = (list, slug) => {
-        let returned = {};
-
-        list.forEach(taxonomy => {
-          if (taxonomy.slug === slug) {
-            returned = taxonomy;
-          }
-        });
-
-        return returned;
-      };
-
       let taxonomyData =
         taxonomy === 'categories'
-          ? lookupTaxonomy(this.props.categories, slug)
-          : lookupTaxonomy(this.props.tags, slug);
+          ? this.lookupTaxonomy(this.props.categories, slug)
+          : this.lookupTaxonomy(this.props.tags, slug);
 
       return {
         title: taxonomyData.name,
@@ -156,11 +163,38 @@ class Blog extends Component {
       };
     } else {
       return {
-        title: 'OpenMined Blog',
-        excerpt: blogExcerpt,
+        title,
+        excerpt,
         links
       };
     }
+  }
+
+  generateMetadata(locale, categories) {
+    let title, shortName, excerpt;
+
+    if (locale === 'digs') {
+      let digsData = this.lookupTaxonomy(categories, locale);
+
+      title = digsData.name;
+      shortName = title;
+      excerpt = digsData.description;
+    } else {
+      title = blogTitle;
+      shortName = blogShortName;
+      excerpt = blogExcerpt;
+    }
+
+    return {
+      title,
+      shortName,
+      excerpt,
+      images: {
+        image: `${SITE_URL}/images/logo-${locale}.png`,
+        facebookImage: `${SITE_URL}/images/logo-${locale}-facebook.png`,
+        twitterImage: `${SITE_URL}/images/logo-${locale}-twitter.png`
+      }
+    };
   }
 
   render() {
@@ -170,28 +204,66 @@ class Blog extends Component {
       tags,
       homepageLoaded,
       postsReady,
-      outOfPosts
+      outOfPosts,
+      content
     } = this.props;
 
-    const { taxonomy, slug } = this.props.match.params;
+    const { taxonomy, slug, locale } = this.props.match.params;
+
+    const { title, shortName, excerpt, images } = this.generateMetadata(
+      locale,
+      categories
+    );
 
     return (
-      <Page id="blog" {...this.seoHeaderInfo(taxonomy, slug)}>
+      <Page
+        id="blog"
+        {...this.seoHeaderInfo(taxonomy, slug, shortName, excerpt, images)}
+      >
         <Loading shouldHideWhen={homepageLoaded && postsReady} />
         {postsReady && (
           <div id="posts-content">
-            <BlogHeader {...this.blogHeaderInfo(taxonomy, slug)} />
+            <BlogHeader
+              {...this.blogHeaderInfo(taxonomy, slug, title, excerpt)}
+            />
+            {locale === 'digs' &&
+              homepageLoaded && (
+                <Container>
+                  <Row>
+                    <Column sizes={{ small: 12 }}>
+                      <ul id="digs-filter">
+                        <li className="digs-filter-description">
+                          Sort by a topic:
+                        </li>
+                        {content.weekly_digs.digs_tags.map(tag => {
+                          tag = this.lookupTaxonomy(tags, tag, 'id');
+
+                          return (
+                            <li key={`dig-tag-${tag.id}`}>
+                              <Link to={`/digs/tags/${tag.slug}`}>
+                                {tag.name}
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </Column>
+                  </Row>
+                </Container>
+              )}
             <BlogPosts
               type="recent"
               posts={posts.slice(0, 3)}
               categories={categories}
               tags={tags}
+              locale={locale}
             />
             <BlogPosts
               type="previous"
               posts={posts.slice(3)}
               categories={categories}
               tags={tags}
+              locale={locale}
             />
             {!outOfPosts && (
               <div id="more-posts">
@@ -201,6 +273,12 @@ class Blog extends Component {
               </div>
             )}
           </div>
+        )}
+        {homepageLoaded && (
+          <FooterLinks
+            links={content.footer.links}
+            socialMedia={content.general.social_media}
+          />
         )}
       </Page>
     );

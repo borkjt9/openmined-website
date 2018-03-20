@@ -11,6 +11,7 @@ import { getContent } from '../../../../../modules/homepage';
 
 import BlogHeader from '../../../components/blog-header';
 import Loading from '../../../components/loading';
+import FooterLinks from '../../../components/footer-links';
 
 import './blog-post.css';
 
@@ -56,18 +57,26 @@ class BlogPost extends Component {
     );
   }
 
-  getCategory(categories, post) {
-    const category = lookupTaxonomy(categories, post.categories[0]);
+  getCategory(locale, categories, post) {
+    let category;
+
+    if (locale === 'blog') {
+      category = lookupTaxonomy(categories, post.categories[0]);
+      category.link = '/blog/categories/' + category.slug;
+    } else {
+      category = lookupTaxonomy(categories, post.categories[0]);
+      category.link = '/digs';
+    }
 
     return (
       <div id="the-category">
         <span>Posted under </span>
-        <Link to={`/blog/categories/${category.slug}`}>{category.name}</Link>
+        <Link to={category.link}>{category.name}</Link>
       </div>
     );
   }
 
-  getTags(tags, post) {
+  getTags(locale, tags, post) {
     return (
       <div id="the-tags">
         <span>Tagged with </span>
@@ -77,7 +86,7 @@ class BlogPost extends Component {
 
             return (
               <li key={`blog-post-tag-${tag.slug}`}>
-                <Link to={`/blog/tags/${tag.slug}`}>#{tag.name}</Link>
+                <Link to={`/${locale}/tags/${tag.slug}`}>#{tag.name}</Link>
               </li>
             );
           })}
@@ -129,6 +138,8 @@ class BlogPost extends Component {
       content
     } = this.props;
 
+    const { locale } = this.props.match.params;
+
     return (
       <Page
         id="blog-post"
@@ -145,12 +156,12 @@ class BlogPost extends Component {
             <Container>
               <Row>
                 <Column sizes={{ small: 12 }}>
-                  {this.getCategory(categories, post)}
+                  {this.getCategory(locale, categories, post)}
                 </Column>
               </Row>
               <Row>
                 <Column sizes={{ small: 12 }}>
-                  {post.tags.length > 0 && this.getTags(tags, post)}
+                  {post.tags.length > 0 && this.getTags(locale, tags, post)}
                 </Column>
               </Row>
               <Row>
@@ -162,6 +173,12 @@ class BlogPost extends Component {
               </Row>
             </Container>
           </div>
+        )}
+        {homepageLoaded && (
+          <FooterLinks
+            links={content.footer.links}
+            socialMedia={content.general.social_media}
+          />
         )}
       </Page>
     );
