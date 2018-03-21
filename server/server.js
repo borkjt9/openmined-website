@@ -1,10 +1,12 @@
 /*
   TODO:
+  - Make single page work
   - Look into issues with images
     - Potentially move them into a forward directory rather than a backwards directory
     - If all else fails, move them to the public directory and call it a day
   - Make sure manifest still works correctly
   - Fix FOUC
+  - Document yarn serve improvement as issue to remove TLS
 */
 
 // Silly global things

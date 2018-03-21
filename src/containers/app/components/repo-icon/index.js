@@ -5,8 +5,7 @@ import sonarIcon from './assets/sonar.svg';
 import mineIcon from './assets/mine.svg';
 import adaptersIcon from './assets/adapters.svg';
 import gridIcon from './assets/grid.svg';
-// import openminedIcon from '../../assets/logo-square-color.svg';
-const openminedIcon = '/images/logo-square-color.svg';
+import openminedIcon from '../../assets/logo-square-color.svg';
 
 export const hasRepoIcon = repo => {
   if (!repo) {

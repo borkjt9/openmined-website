@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 import './blog-header.css';
 
-// import logo from '../../assets/logo-gradientbg.svg';
+import logo from '../../assets/logo-gradientbg.svg';
 
 const BlogHeader = ({ title, excerpt, links }) => (
   <div id="blog-header">
@@ -19,7 +19,7 @@ const BlogHeader = ({ title, excerpt, links }) => (
       <Row>
         <Column sizes={{ small: 12 }} className="header">
           <Link to="/" className="header-logo">
-            <img src="/images/logo-gradientbg.svg" alt="OpenMined" />
+            <img src={logo} alt="OpenMined" />
           </Link>
           <ul className="header-items">
             {links &&

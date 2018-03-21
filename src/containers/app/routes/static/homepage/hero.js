@@ -9,7 +9,7 @@ import {
 } from 'openmined-ui';
 import ExternalLink from '../../../components/external-link';
 
-// import logo from '../../../assets/logo-gradientbg.svg';
+import logo from '../../../assets/logo-gradientbg.svg';
 
 const copyText = (code, addNotification) => {
   var textArea = document.createElement('textarea');
@@ -71,7 +71,7 @@ const Hero = props => (
     <Container>
       <Row>
         <Column sizes={{ small: 12 }}>
-          <img src="/images/logo-gradientbg.svg" id="logo" alt="OpenMined" />
+          <img src={logo} id="logo" alt="OpenMined" />
           <Heading id="tagline" level={2}>
             {props.tagline}
           </Heading>
