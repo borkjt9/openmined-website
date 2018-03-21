@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import ExternalLink from '../external-link';
 import { Row, Column, Container } from 'openmined-ui';
 
-import logo from '../../assets/logo-blackbg.svg';
+// import logo from '../../assets/logo-blackbg.svg';
 
 import './footer-links.css';
 
@@ -19,7 +19,7 @@ export default ({ links, socialMedia }) => (
           <ul className="footer-items">
             <li className="logo">
               <Link to="/">
-                <img src={logo} alt="OpenMined" />
+                <img src="/images/logo-blackbg.svg" alt="OpenMined" />
               </Link>
             </li>
             {links &&

@@ -22,7 +22,7 @@ const blogExcerpt =
 
 // TODO: Newsletter link...
 
-const frontload = props => {
+const frontload = async props => {
   const request = { page: 1 };
   const { taxonomy, slug, locale } = props.match.params;
 
@@ -34,7 +34,7 @@ const frontload = props => {
     request[taxonomy] = slug;
   }
 
-  return props.getPosts(request, true);
+  await props.getPosts(request, true);
 };
 
 class Blog extends Component {

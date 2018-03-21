@@ -6,6 +6,7 @@ import { Container, Row, Column, Page } from 'openmined-ui';
 import renderHTML from 'react-render-html';
 import moment from 'moment';
 import { frontloadConnect } from 'react-frontload';
+import { SITE_URL } from '../../../../../modules';
 import { getCurrentPost } from '../../../../../modules/blog';
 import { getContent } from '../../../../../modules/homepage';
 
@@ -15,25 +16,26 @@ import FooterLinks from '../../../components/footer-links';
 
 import './blog-post.css';
 
-const lookupTaxonomy = (list, id) => {
-  let returned = {};
-
-  if (list) {
-    list.forEach(taxonomy => {
-      if (taxonomy.id === id) {
-        returned = taxonomy;
-      }
-    });
-  }
-
-  return returned;
-};
-
-const frontload = props => props.getCurrentPost(props.match.params.slug);
+const frontload = async props =>
+  await props.getCurrentPost(props.match.params.slug);
 
 class BlogPost extends Component {
   componentWillMount() {
     this.props.getContent(false);
+  }
+
+  lookupTaxonomy(list, id) {
+    let returned = {};
+
+    if (list) {
+      list.forEach(taxonomy => {
+        if (taxonomy.id === id) {
+          returned = taxonomy;
+        }
+      });
+    }
+
+    return returned;
   }
 
   getExcerpt(post, author) {
@@ -61,10 +63,10 @@ class BlogPost extends Component {
     let category;
 
     if (locale === 'blog') {
-      category = lookupTaxonomy(categories, post.categories[0]);
+      category = this.lookupTaxonomy(categories, post.categories[0]);
       category.link = '/blog/categories/' + category.slug;
     } else {
-      category = lookupTaxonomy(categories, post.categories[0]);
+      category = this.lookupTaxonomy(categories, post.categories[0]);
       category.link = '/digs';
     }
 
@@ -82,7 +84,7 @@ class BlogPost extends Component {
         <span>Tagged with </span>
         <ul>
           {post.tags.map(tag => {
-            tag = lookupTaxonomy(tags, tag);
+            tag = this.lookupTaxonomy(tags, tag);
 
             return (
               <li key={`blog-post-tag-${tag.slug}`}>
@@ -95,7 +97,7 @@ class BlogPost extends Component {
     );
   }
 
-  seoHeaderInfo(post, categories, tags, featuredMedia) {
+  seoHeaderInfo(post, categories, tags, featuredMedia, locale) {
     if (post.title) {
       let firstParaIndex = post.excerpt.rendered.indexOf('<p>') + 3;
       let firstParaEndingIndex = post.excerpt.rendered.indexOf('</p>') - 3;
@@ -103,23 +105,37 @@ class BlogPost extends Component {
         firstParaIndex,
         firstParaEndingIndex
       );
-      let theCategory = lookupTaxonomy(categories, post.categories[0]);
+      let theCategory = this.lookupTaxonomy(categories, post.categories[0]);
       let theTags = [];
 
       post.tags.forEach(tag => {
-        let foundTag = lookupTaxonomy(tags, tag);
+        let foundTag = this.lookupTaxonomy(tags, tag);
 
         if (foundTag) {
           theTags.push(foundTag.name);
         }
       });
 
+      let images;
+
+      if (featuredMedia.source_url) {
+        images = {
+          image: featuredMedia.source_url
+        };
+      } else {
+        images = {
+          image: `${SITE_URL}/images/logo-${locale}.png`,
+          facebookImage: `${SITE_URL}/images/logo-${locale}-facebook.png`,
+          twitterImage: `${SITE_URL}/images/logo-${locale}-twitter.png`
+        };
+      }
+
       return {
         title: post.title.rendered,
         description: firstPara.substring(0, 160),
-        image: featuredMedia.source_url ? featuredMedia.source_url : null,
         category: theCategory.name ? theCategory.name : null,
-        tags: theTags.length > 0 ? theTags.join() : null
+        tags: theTags.length > 0 ? theTags.join() : null,
+        ...images
       };
     } else {
       return null;
@@ -143,7 +159,7 @@ class BlogPost extends Component {
     return (
       <Page
         id="blog-post"
-        {...this.seoHeaderInfo(post, categories, tags, featuredMedia)}
+        {...this.seoHeaderInfo(post, categories, tags, featuredMedia, locale)}
       >
         <Loading shouldHideWhen={homepageLoaded && currentPostReady} />
         {currentPostReady && (

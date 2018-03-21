@@ -216,17 +216,27 @@ const getPost = (API_URL, slug) => dispatch =>
 
 const getFeaturedMedia = (API_URL, id) => dispatch =>
   new Promise(resolve => {
-    fetch(API_URL + '/wp/v2/media/' + id)
-      .then(response => response.json())
-      .then(response => {
-        dispatch({
-          type: GET_CURRENT_FEATURED_MEDIA,
-          media: response
-        });
+    // There may not be featured media... in which case, return an empty object
+    if (id === 0) {
+      dispatch({
+        type: GET_CURRENT_FEATURED_MEDIA,
+        media: {}
+      });
 
-        resolve(response);
-      })
-      .catch(error => dispatch(handleWordpressError(error)));
+      resolve({});
+    } else {
+      fetch(API_URL + '/wp/v2/media/' + id)
+        .then(response => response.json())
+        .then(response => {
+          dispatch({
+            type: GET_CURRENT_FEATURED_MEDIA,
+            media: response
+          });
+
+          resolve(response);
+        })
+        .catch(error => dispatch(handleWordpressError(error)));
+    }
   });
 
 const getAuthor = (API_URL, id) => dispatch =>
