@@ -1,7 +1,5 @@
 /*
   TODO:
-  - Add explaination of featured images on Wordpress backend to all posts
-  - Issue with self-signed certificate on serve
   - Look into issues with images
     - Potentially move them into a forward directory rather than a backwards directory
     - If all else fails, move them to the public directory and call it a day

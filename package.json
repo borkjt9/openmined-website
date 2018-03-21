@@ -41,21 +41,21 @@
     "source-map-explorer": "^1.5.0"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,json,css}": [
-      "prettier --single-quote --write",
-      "git add"
-    ]
+    "src/**/*.{js,jsx,json,css}": ["prettier --single-quote --write", "git add"]
   },
   "scripts": {
     "analyze": "yarn build && source-map-explorer build/static/js/main.*",
     "precommit": "lint-staged",
-    "build-css": "node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/",
-    "watch-css": "yarn build-css && node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/ --watch --recursive",
+    "build-css":
+      "node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/",
+    "watch-css":
+      "yarn build-css && node-sass-chokidar --include-path ./src --include-path ./node_modules src/ -o src/ --watch --recursive",
     "start-js": "react-scripts start",
     "start": "npm-run-all -p watch-css start-js",
     "build": "yarn build-css && react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "serve": "NODE_ENV=development node ./server/index.js",
+    "serve":
+      "NODE_ENV=development NODE_TLS_REJECT_UNAUTHORIZED=0 node ./server/index.js",
     "deploy": "NODE_ENV=production node ./server/index.js",
     "eject": "react-scripts eject"
   }
