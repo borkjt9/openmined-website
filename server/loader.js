@@ -86,11 +86,11 @@ export default (req, res) => {
       ).then(routeMarkup => {
         if (context.url) {
           // If we need to handle a redirect...
-          res
-            .writeHead(302, {
-              Location: context.url
-            })
-            .end();
+          res.writeHead(302, {
+            Location: context.url
+          });
+
+          res.end();
         } else {
           // Otherwise, we carry on...
           const extractAssets = (assets, chunks) =>
